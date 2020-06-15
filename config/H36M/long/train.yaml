@@ -1,5 +1,5 @@
-data_dir: '/DATA7_DB7/data/msli/CVPR2020/code/data/h3.6m/dataset'
-work_dir: './work_dir/prediction'
+data_dir: '/home/user/data/h36m/expmap/h3.6m/dataset'
+work_dir: '/home/user/workdir'
 
 actions: 'all'
 subtrain: [1,6,7,8,9,11]
@@ -38,7 +38,7 @@ step: [1000,  2000,  3000,  4000,  5000,  6000,  7000,  8000,  9000,  10000,
        31000, 32000, 33000, 34000, 35000, 36000, 37000, 38000, 39000, 40000]
 base_lr: 0.0001
 use_gpu: True
-device: [8]
+device: [0]
 
 lamda: 0.6
 fusion_layer_dir: fusion_2
