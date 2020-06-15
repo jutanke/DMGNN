@@ -8,7 +8,6 @@ TMP_LOC=`cat loc_tmp.txt`
 cp Dockerfile Dockerfile.bkp
 
 echo "RUN echo \"set password\"" >> Dockerfile
-echo "RUN python -c \"import mocap.settings as settings; settings.set_password('NochNichtJetzt!')\"" >> Dockerfile
 
 if [ -f "loc_data.txt" ]; then
 	DATA_LOC=`cat loc_data.txt`
