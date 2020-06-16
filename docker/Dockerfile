@@ -25,4 +25,5 @@ ENV CDF_BIN /cdf37_0-dist/bin
 RUN pip install numpy && pip install pyyaml
 RUN git clone https://github.com/jutanke/DMGNN.git && cd DMGNN/torchlight && python setup.py install
 
-RUN pip install git+https://github.com/jutanke/mocap.git
+RUN pip install numba
+RUN echo "0" && pip install git+https://github.com/jutanke/mocap.git

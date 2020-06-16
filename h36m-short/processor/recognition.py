@@ -22,6 +22,9 @@ from .processor import Processor
 from .data_tools import *
 
 
+USE_EULER_ANGLES = False
+
+
 def weights_init(m):
     classname = m.__class__.__name__
     if classname.find('Conv1d') != -1:
@@ -201,28 +204,38 @@ class REC_Processor(Processor):
                                      self.arg.lamda)
 
             if evaluation:
+                global USE_EULER_ANGLES
                 mean_errors = np.zeros((8, 25), dtype=np.float32)
                 for i in np.arange(8):
 
                     output = outputs[i]                   # output: [V, t, d] = [21, 25, 3]
                     V, t, d = output.shape
+                    
                     output = output.permute(1,0,2).contiguous().view(t, V*d)
                     output_denorm = unnormalize_data(output.cpu().numpy(), self.data_mean, self.data_std, self.dim_ignore, self.dim_use, self.dim_zero)
-                    t, D = output_denorm.shape
-                    output_euler = np.zeros((t,D) , dtype=np.float32)        # [21, 99]
-                    for j in np.arange(t):
-                        for k in np.arange(3,97,3):
-                            output_euler[j,k:k+3] = rotmat2euler(expmap2rotmat(output_denorm[j,k:k+3]))
-
+                    
                     target = targets[i]
                     target = target.permute(1,0,2).contiguous().view(t, V*d)
                     target_denorm = unnormalize_data(target.cpu().numpy(), self.data_mean, self.data_std, self.dim_ignore, self.dim_use, self.dim_zero)
-                    target_euler = np.zeros((t,D) , dtype=np.float32)
-                    for j in np.arange(t):
-                        for k in np.arange(3,97,3):
-                            target_euler[j,k:k+3] = rotmat2euler(expmap2rotmat(target_denorm[j,k:k+3]))
+                    
+                    
+                    t, D = output_denorm.shape
+                    if USE_EULER_ANGLES:
+                        output_euler = np.zeros((t,D) , dtype=np.float32)        # [21, 99]
+                        for j in np.arange(t):
+                            for k in np.arange(3,97,3):
+                                output_euler[j,k:k+3] = rotmat2euler(expmap2rotmat(output_denorm[j,k:k+3]))
 
-                    target_euler[:,0:6] = 0
+                        target_euler = np.zeros((t,D) , dtype=np.float32)
+                        for j in np.arange(t):
+                            for k in np.arange(3,97,3):
+                                target_euler[j,k:k+3] = rotmat2euler(expmap2rotmat(target_denorm[j,k:k+3]))
+
+                        target_euler[:,0:6] = 0
+                    else:
+                        output_euler = output_denorm
+                        target_euler = target_denorm
+
                     # idx_to_use = np.where(np.std(target_euler,0)>1e-4)[0]
                     idx_to_use1 = np.where(np.std(target_euler,0)>1e-4)[0]
                     idx_to_use2 = self.dim_nonzero

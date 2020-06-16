@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import copy
+import mocap.datasets.h36m as H36M
 
 
 def read_txt_as_data(filename):
@@ -29,17 +30,22 @@ def define_actions(action):
         raise( ValueError, "Unrecognized action: %d" % action )
 
 
+DS_H36M = H36M.H36M_FixedSkeleton(
+    remove_global_Rt=True,
+    actors=['S1', 'S6', 'S7', 'S8', 'S9', 'S11', 'S5'])
 
 def load_data(data_path, subjects, actions):
+    global DS_H36M
     nactions = len(actions)
     sampled_data_set, complete_data = {}, []
     for subj in subjects:
         for action_idx in np.arange(len(actions)):
             action = actions[action_idx]
             for subact in [1, 2]:
-                print("Reading subject {0}, action {1}, subaction {2}".format(subj, action, subact))
-                filename = '{0}/S{1}/{2}_{3}.txt'.format(data_path, subj, action, subact)
-                action_sequence = read_txt_as_data(filename)
+                #print("Reading subject {0}, action {1}, subaction {2}".format(subj, action, subact))
+                #filename = '{0}/S{1}/{2}_{3}.txt'.format(data_path, subj, action, subact)
+                #action_sequence = read_txt_as_data(filename)
+                action_sequence = DS_H36M.get_sequence_by_key(('S' + str(subj), action, subact))
                 t, d = action_sequence.shape
                 even_indices = range(0, t, 2)
                 sampled_data_set[(subj, action, subact, 'even')] = action_sequence[even_indices, :]
